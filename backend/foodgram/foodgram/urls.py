@@ -21,7 +21,8 @@ from django.conf import settings
 
 urlpatterns = [
 
-    path('api/', include('users.urls')),
+    path('api/', include('users.urls')),  # Подключаем маршруты для users
+    path('api/', include('recipes.urls')),  # Подключаем маршруты для ингредиентов (или рецептов)
     path("admin/", admin.site.urls),
     # path("api/", include("api.urls")),
     # path("", include("recipes.urls")),

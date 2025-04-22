@@ -9,4 +9,4 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return True
 
         # Разрешаем доступ для изменения объекта только владельцу
-        return obj == request.user
+        return obj.author == request.user  # Проверяем, что автор объекта — это текущий пользователь
