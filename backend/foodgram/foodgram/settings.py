@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "backend",
     "foodgram-backend",
+    "*", 
 ]
 
 MEDIA_URL = "/media/"
@@ -137,11 +138,11 @@ DJOSER = {
         "user": ["rest_framework.permissions.AllowAny"],
     },
     "SERIALIZERS": {
-        "user": "api.serializers.UserProfileSerializer",
-        "current_user": "api.serializers.UserProfileSerializer",
+        "user": "users.serializers.UserSerializer",
+        "current_user": "users.serializers.UserSerializer",
+        "user_create": "users.serializers.UserCreateSerializer",
     },
-    # если не хотите, чтобы Djoser отдавал список пользователей на GET /users/:
-    # 'HIDE_USERS': True,
+
 }
 
 AUTH_USER_MODEL = "users.User"
@@ -150,7 +151,7 @@ AUTH_USER_MODEL = "users.User"
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru-Ru"
 
 TIME_ZONE = "UTC"
 
@@ -164,7 +165,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = "/static/"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
