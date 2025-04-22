@@ -6,6 +6,8 @@ from django.core.exceptions import ValidationError
 import re
 from django.core.files.base import ContentFile
 import base64
+from recipes.serializers import RecipeSerializer
+from recipes.models import Recipe
 
 class UserSerializer(DjoserUserSerializer):
     """Расширенный сериализатор пользователя."""
@@ -73,3 +75,39 @@ class AvatarSerializer(serializers.Serializer):
             raise serializers.ValidationError("Некорректный формат изображения.")
 
         return ContentFile(decoded_img, name=f"user_avatar.{ext}")
+
+
+# Новый сериализатор для рецептов в подписке (только нужные поля)
+class RecipeForSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ("id", "name", "image", "cooking_time")
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            "id", "username", "first_name", "last_name",
+            "email", "is_subscribed", "avatar",
+            "recipes", "recipes_count"
+        )
+
+    def get_is_subscribed(self, obj):
+        current_user = self.context["request"].user
+        return Subscription.objects.filter(user=current_user, author=obj).exists()
+
+    def get_recipes(self, obj):
+        request = self.context.get("request")
+        recipes_limit = request.query_params.get("recipes_limit")
+        queryset = obj.recipes.all()
+        if recipes_limit and recipes_limit.isdigit():
+            queryset = queryset[:int(recipes_limit)]
+        return RecipeForSubscriptionSerializer(queryset, many=True, context=self.context).data
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
