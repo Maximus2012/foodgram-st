@@ -52,19 +52,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
             raise AuthenticationFailed("Необходимо войти в систему.")
         
         try:
-            recipe = self.get_object()
+            recipe = self.get_object()  # Получаем рецепт по ID
         except Recipe.DoesNotExist:
             raise NotFound("Рецепт не найден.")
-
 
         # Проверяем, не находится ли уже в корзине
         if ShoppingCart.objects.filter(user=request.user, recipe=recipe).exists():
             return Response({"detail": "Рецепт уже добавлен в корзину."}, status=400)
 
+        # Добавляем рецепт в корзину
         ShoppingCart.objects.create(user=request.user, recipe=recipe)
-        data = RecipeSerializer(recipe).data
-        return Response(data, status=201)
 
+        # Сериализация данных рецепта, но оставляем только нужные поля
+        data = RecipeSerializer(recipe).data
+
+        # Оставляем только поля, необходимые по схеме
+        cleaned_data = {
+            "id": data["id"],
+            "name": data["name"],
+            "image": data["image"],
+            "cooking_time": data["cooking_time"]
+        }
+
+        return Response(cleaned_data, status=201)
+    
     @action(detail=False, methods=['get'], url_path='download_shopping_cart', permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         shopping_cart_items = ShoppingCart.objects.filter(user=request.user)
