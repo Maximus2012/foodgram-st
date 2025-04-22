@@ -5,8 +5,10 @@ from .views import UserViewSet
 # Создаём экземпляр DefaultRouter
 router = DefaultRouter()
 
+# Регистрируем UserViewSet
+router.register(r'users', UserViewSet)
 
-router.register(r'users', UserViewSet)  
+
 
 urlpatterns = [
     # Включаем маршруты для аутентификации от Djoser
