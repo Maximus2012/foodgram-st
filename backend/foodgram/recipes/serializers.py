@@ -136,3 +136,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         representation['author'] = self.get_author(instance)  # Добавляем авторов вручную в ответ
         return representation
 
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
