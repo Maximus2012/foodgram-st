@@ -12,7 +12,7 @@ class IngredientFilter(filters.FilterSet):
 
 
 class RecipeFilter(filters.FilterSet):
-    """Фильтр для рецептов по автору."""
+    """Фильтр для рецептов по автору, наличию в корзине и избранном."""
 
     author = filters.NumberFilter(field_name="author_id")
     is_in_shopping_cart = filters.NumberFilter(method="filter_in_shopping_cart")
@@ -21,3 +21,13 @@ class RecipeFilter(filters.FilterSet):
     class Meta:
         model = Recipe
         fields = ['author']
+
+    def filter_in_shopping_cart(self, queryset, name, value):
+        if value and hasattr(self.request, 'user') and self.request.user.is_authenticated:
+            return queryset.filter(added_to_carts__user=self.request.user)
+        return queryset
+
+    def filter_is_favorited(self, queryset, name, value):
+        if value and hasattr(self.request, 'user') and self.request.user.is_authenticated:
+            return queryset.filter(marked_as_favorite__user=self.request.user)
+        return queryset

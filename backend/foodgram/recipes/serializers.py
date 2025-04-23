@@ -125,10 +125,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         }
 
     def get_is_favorited(self, obj):
-        return False
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return obj.marked_as_favorite.filter(user=user).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        return False
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return obj.added_to_carts.filter(user=user).exists()
 
     def to_representation(self, instance):
         """Сериализация рецепта с включением всех полей."""
