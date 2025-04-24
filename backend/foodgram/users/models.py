@@ -34,7 +34,7 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "first_name", "last_name"]
-    
+
     class Meta:
         ordering = ["username"]
         verbose_name = "Пользователь"
@@ -42,6 +42,7 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.username
+
 
 class Subscription(models.Model):
     """Модель, отражающая отношение подписки между пользователями."""
