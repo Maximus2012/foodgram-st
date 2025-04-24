@@ -5,9 +5,9 @@ from .serializers import UserSerializer
 from api.pagination import StandardResultsPagination
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets, status
+from rest_framework import status
 from .serializers import AvatarSerializer, SubscriptionSerializer
-from recipes.models import Recipe
+
 
 class UserViewSet(DjoserUserViewSet):
     """Представление для пользователей с дополнительной информацией о подписке и аватаре."""
@@ -19,7 +19,11 @@ class UserViewSet(DjoserUserViewSet):
     def get_permissions(self):
         """Настройка прав доступа в зависимости от выполняемого действия."""
         custom_actions = {"me", "avatar"}
-        permission_classes = [IsAuthenticated] if self.action in custom_actions else self.permission_classes
+        permission_classes = (
+            [IsAuthenticated]
+            if self.action in custom_actions
+            else self.permission_classes
+        )
         return [permission() for permission in permission_classes]
 
     @action(
@@ -40,8 +44,10 @@ class UserViewSet(DjoserUserViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            subscription_instance, is_new_subscription = Subscription.objects.get_or_create(
-                user=current_user, author=target_user
+            subscription_instance, is_new_subscription = (
+                Subscription.objects.get_or_create(
+                    user=current_user, author=target_user
+                )
             )
 
             if not is_new_subscription:
@@ -55,9 +61,13 @@ class UserViewSet(DjoserUserViewSet):
             subscription_serializer = SubscriptionSerializer(
                 target_user, context={"request": request}
             )
-            return Response(subscription_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                subscription_serializer.data, status=status.HTTP_201_CREATED
+            )
 
-        subscription_instance = Subscription.objects.filter(user=current_user, author=target_user).first()
+        subscription_instance = Subscription.objects.filter(
+            user=current_user, author=target_user
+        ).first()
         if not subscription_instance:
             return Response(
                 {"error": "Вы не подписаны на этого пользователя."},
@@ -65,20 +75,26 @@ class UserViewSet(DjoserUserViewSet):
             )
         subscription_instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-    @action(detail=False, methods=['get'], url_path='subscriptions')
+
+    @action(detail=False, methods=["get"], url_path="subscriptions")
     def subscriptions(self, request):
         current_user = request.user
 
-        followed = Subscription.objects.filter(user=current_user).values_list('author', flat=True)
+        followed = Subscription.objects.filter(user=current_user).values_list(
+            "author", flat=True
+        )
         authors = User.objects.filter(id__in=followed)
 
         page = self.paginate_queryset(authors)
         if page is not None:
-            serializer = SubscriptionSerializer(page, many=True, context={'request': request})
+            serializer = SubscriptionSerializer(
+                page, many=True, context={"request": request}
+            )
             return self.get_paginated_response(serializer.data)
 
-        serializer = SubscriptionSerializer(authors, many=True, context={'request': request})
+        serializer = SubscriptionSerializer(
+            authors, many=True, context={"request": request}
+        )
 
     @action(
         detail=False,
@@ -92,14 +108,16 @@ class UserViewSet(DjoserUserViewSet):
         # Обработка DELETE запроса
         if request.method == "DELETE":
             user.avatar.delete(save=True)
-            return Response({"detail": "Аватар успешно удалён."}, status=status.HTTP_204_NO_CONTENT)
+            return Response(
+                {"detail": "Аватар успешно удалён."}, status=status.HTTP_204_NO_CONTENT
+            )
 
         # Обработка PUT запроса
         avatar_serializer = AvatarSerializer(data=request.data)
         if avatar_serializer.is_valid():
-            avatar = avatar_serializer.validated_data['avatar']
-            user.avatar = avatar  # Сохраняем изображение в поле avatar
-            user.save()  # Сохраняем пользователя с новым аватаром
+            avatar = avatar_serializer.validated_data["avatar"]
+            user.avatar = avatar
+            user.save()
             return Response({"avatar": user.avatar.url}, status=status.HTTP_200_OK)
 
         return Response(avatar_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

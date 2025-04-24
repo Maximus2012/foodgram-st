@@ -21,12 +21,11 @@ from django.conf import settings
 
 urlpatterns = [
 
-    path('api/', include('users.urls')),  # Подключаем маршруты для users
-    path('api/', include('recipes.urls')),  # Подключаем маршруты для ингредиентов (или рецептов)
+    path('api/', include('users.urls')),
+    path('api/', include('recipes.urls')),
     path("admin/", admin.site.urls),
-    # path("api/", include("api.urls")),
-    # path("", include("recipes.urls")),
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

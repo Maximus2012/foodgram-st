@@ -5,7 +5,7 @@ services:
     container_name: foodgram-front
     build: ../frontend
     volumes:
-      - ../frontend/:/app/result_build/
+      - ../frontend/:/result_build/
   nginx:
     container_name: foodgram-proxy
     image: nginx:1.25.4-alpine

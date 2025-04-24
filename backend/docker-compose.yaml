@@ -36,7 +36,6 @@ services:
       - static_volume:/static
       - media_volume:/media
       - ./backend/foodgram/data:/foodgram/data
-
 volumes:
   pg_data:
   static_volume:

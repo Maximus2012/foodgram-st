@@ -1,48 +1,55 @@
-## **Технологии, используемые в проекте**
-- **БД**: PostgreSQL  
-- **Серверная часть**: Django 3.2.16 + DRF 3.12.4  
-- **Авторизация**: JWT через Djoser 2.3.1  
-- **Инфраструктура**: Docker + Docker Compose, Gunicorn, Nginx  
-- **CI/CD**: GitHub Actions + публикация в Docker Hub  
+#  Foodgram – Recipe Sharing API
+
+A backend service for managing and sharing recipes, subscribing to authors, adding favorites, and generating shopping lists.
 
 ---
 
-## **Как развернуть проект локально**
+##  Tech Stack
+| **Category**        | **Technologies**                               |
+|---------------------|------------------------------------------------|
+| Backend             | Python 3.9, Django 3.2, Django REST Framework  |
+| Authentication      | Djoser, Simple JWT                             |
+| Database            | PostgreSQL                                     |
+| Containerization    | Docker, Docker Compose                         |
+| CI/CD               | GitHub Actions, Nginx                          |
 
-###  1. Клонирование репозитория
-```bash
-git clone https://github.com/Maximus2012/foodgram-st.git
-```
+---
 
-###  2. Настройка переменных окружения
-Создайте файл `.env` в корне проекта и добавьте туда следующее:
+##  Getting Started
 
-```ini
+###  Environment Variables
+The project uses the following environment variables to configure database access:
+
+```env
 DEBUG=True of False
-SECRET_KEY=секретный_ключ
-DB_NAME=имя_бд
-DB_USER=пользователь_бд
-DB_PASSWORD=пароль_бд
-DB_HOST=db
-DB_PORT=порт_бд
-DOCKER_USERNAME=ваш_логин_на_docker_hub
+SECRET_KEY=<your_sercret_key>
+DB_NAME=<your_database_name>
+DB_USER=<your_username>
+DB_PASSWORD=<your_password>
+DB_HOST=<your_database_host>
+DB_PORT=<your_database_port>
 ```
 
-###  3. Сборка и запуск контейнеров
+###  Running the Project with Docker
+
 ```bash
-docker-compose up -d --build
+docker compose build
+docker compose up
 ```
-После старта проект будет доступен по адресу:  
-👉 [http://localhost:80](http://localhost:80)
 
-###  4. Панель администратора Django
-Доступна по адресу:  
+After the containers are running, the API will be available based on the settings in your `docker-compose.yml` and Nginx configuration.
+
+After startup, the project will be available at:  
+👉 [http://localhost:8000](http://localhost:8000)
+
+###  4. Django Admin Panel
+Accessible at:  
 👉 [http://localhost:8000/admin](http://localhost:8000/admin)
 
 ---
 
-###  Импорт начальных данных
-Для загрузки данных ингредиентов выполните:
+###  Importing Initial Data
+To load the initial ingredient data, run:
 ```bash
 python manage.py import_data
 ```

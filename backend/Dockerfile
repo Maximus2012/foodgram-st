@@ -9,4 +9,4 @@ RUN pip install --upgrade pip && \
 
 RUN mkdir -p /app/static
 
-CMD ["sh", "-c", "cd foodgram && python manage.py migrate --noinput && python manage.py import_data && python manage.py collectstatic --noinput && gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120"]
+CMD ["sh", "-c", "cd foodgram && python manage.py migrate --noinput && python manage.py import_data && python manage.py collectstatic --noinput && gunicorn foodgram.wsgi:application --bind 0:8000 --workers 4 --timeout 120"]

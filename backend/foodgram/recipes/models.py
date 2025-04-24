@@ -103,7 +103,7 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         return f"{self.ingredient.name} — {self.amount} {self.ingredient.measurement_unit} в рецепте '{self.recipe.name}'"
 
-   
+
 class ShoppingCart(models.Model):
     """Хранилище рецептов, добавленных пользователем для покупки."""
 
@@ -132,7 +132,8 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return f"{self.user.username} добавил в покупки: {self.recipe.name}"
-    
+
+
 class Favorite(models.Model):
     """Модель для хранения избранных рецептов пользователя."""
 
