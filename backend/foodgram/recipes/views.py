@@ -27,6 +27,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = IngredientFilter
     pagination_class = None
+    
+    
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
