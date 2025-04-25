@@ -40,11 +40,11 @@ docker compose up
 After the containers are running, the API will be available based on the settings in your `docker-compose.yml` and Nginx configuration.
 
 After startup, the project will be available at:  
-👉 [http://localhost:8000](http://localhost:8000)
+👉 [http://127.0.0.1](http://127.0.0.1)
 
 ###  4. Django Admin Panel
 Accessible at:  
-👉 [http://localhost:8000/admin](http://localhost:8000/admin)
+👉 [http://localhost/admin/](http://localhost/admin/)
 
 ---
 
