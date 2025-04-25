@@ -26,13 +26,9 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True")
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "backend",
-    "foodgram-backend",
-    "*", 
-]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1', 'http://localhost']
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
