@@ -3,16 +3,13 @@ from .models import Ingredient, Recipe
 
 
 class IngredientFilter(filters.FilterSet):
-    """Фильтр для ингредиентов по названию."""
+    """Фильтрация для ингредиентов."""
 
-    name = filters.CharFilter(
-        field_name="name", lookup_expr="icontains", label="Название"
-    )
+    name = filters.CharFilter(field_name='name', lookup_expr='istartswith')
 
     class Meta:
         model = Ingredient
-        fields = ["name"]
-
+        fields = ['name']
 
 class RecipeFilter(filters.FilterSet):
     """Фильтр для рецептов по автору, наличию в корзине и избранном."""

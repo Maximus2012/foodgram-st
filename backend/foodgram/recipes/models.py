@@ -52,7 +52,7 @@ class Ingredient(models.Model):
     """Модель ингредиента."""
 
     name = models.CharField(
-        max_length=50,
+        max_length=100,
         unique=True,
         blank=False,
         verbose_name="Название ингредиента",

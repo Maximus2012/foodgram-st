@@ -7,12 +7,13 @@ volumes:
 
 services:
   db:
-      image: postgres:13.3-alpine
-      container_name: foodgram-db
-      env_file:
-        - ../backend/.env
-      volumes:
-        - pg_data:/var/lib/postgresql/data
+    image: postgres:13.3-alpine
+    container_name: foodgram-db
+    env_file:
+      - ../backend/.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
   backend:
     container_name: foodgram-backend
     build:
@@ -49,6 +50,7 @@ services:
       - backend_media_volume:/usr/share/nginx/html/media/
     depends_on:
       - backend
+      - frontend
     networks:
       - foodgram-network
 
