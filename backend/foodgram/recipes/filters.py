@@ -11,6 +11,7 @@ class IngredientFilter(filters.FilterSet):
         model = Ingredient
         fields = ['name']
 
+
 class RecipeFilter(filters.FilterSet):
     """Фильтр для рецептов по автору, наличию в корзине и избранном."""
 
