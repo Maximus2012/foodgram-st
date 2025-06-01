@@ -91,12 +91,8 @@ WSGI_APPLICATION = "foodgram.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "foodgram"),
-        "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "27119"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",  # База будет создана в корне проекта
     }
 }
 
@@ -138,15 +134,16 @@ DJOSER = {
         "user": ["rest_framework.permissions.AllowAny"],
     },
     "SERIALIZERS": {
-        "user": "users.serializers.UserSerializer",
-        "current_user": "users.serializers.UserSerializer",
-        "user_create": "users.serializers.UserCreateSerializer",
+        "user": "api.serializers.UserSerializer",
+        "current_user": "api.serializers.UserSerializer",
+        "user_create": "api.serializers.UserCreateSerializer",
     },
 
 }
 
 AUTH_USER_MODEL = "users.User"
-
+REST_FRAMEWORK_PAGE_SIZE = 10
+REST_FRAMEWORK_MAX_PAGE_SIZE = 100
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
