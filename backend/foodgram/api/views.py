@@ -4,6 +4,8 @@ from django.http import HttpResponse, JsonResponse
 
 from django_filters import rest_framework as filters
 
+from django.db.models import Sum
+
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -11,8 +13,12 @@ from reportlab.pdfgen import canvas
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import AuthenticationFailed, NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+    AllowAny,
+)
 from rest_framework.response import Response
 
 from djoser.views import UserViewSet as DjoserUserViewSet
@@ -51,7 +57,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAuthenticated(), IsOwnerOrReadOnly()]
+        if self.action in [
+            "add_to_favorite",
+            "add_to_shopping_cart",
+            "download_shopping_cart",
+        ]:
+            return [IsAuthenticated()]
+        return [AllowAny()]
 
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
@@ -59,30 +76,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeWriteSerializer
 
     def create(self, request, *args, **kwargs):
-        if request.user.is_anonymous:
-            raise AuthenticationFailed("Только авторизованные пользователи могут создавать рецепты.")
 
         write_serializer = self.get_serializer(data=request.data)
         write_serializer.is_valid(raise_exception=True)
         self.perform_create(write_serializer)
 
         read_serializer = RecipeReadSerializer(
-            write_serializer.instance,
-            context=self.get_serializer_context()
+            write_serializer.instance, context=self.get_serializer_context()
         )
         headers = self.get_success_headers(read_serializer.data)
-        return Response(read_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
+        return Response(
+            read_serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
-        write_serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        write_serializer = self.get_serializer(
+            instance, data=request.data, partial=partial
+        )
         write_serializer.is_valid(raise_exception=True)
         self.perform_update(write_serializer)
 
         read_serializer = RecipeReadSerializer(
-            write_serializer.instance,
-            context=self.get_serializer_context()
+            write_serializer.instance, context=self.get_serializer_context()
         )
         return Response(read_serializer.data, status=status.HTTP_200_OK)
 
@@ -103,7 +120,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 serializer = serializer_class(recipe, context={"request": request})
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                # fallback - полный сериализатор
                 serializer = RecipeReadSerializer(recipe, context={"request": request})
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -117,9 +133,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["post", "delete"], url_path="shopping_cart", permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=["post", "delete"], url_path="shopping_cart")
     def add_to_shopping_cart(self, request, pk=None):
-        return self._handle_add_remove(ShoppingCart, request, pk, serializer_class=ShortRecipeSerializer)
+        return self._handle_add_remove(
+            ShoppingCart, request, pk, serializer_class=ShortRecipeSerializer
+        )
 
     @action(
         detail=False,
@@ -128,21 +146,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def download_shopping_cart(self, request):
-        shopping_cart_items = ShoppingCart.objects.filter(user=request.user)
+        user = request.user
+        shopping_cart_items = ShoppingCart.objects.filter(user=user)
 
-        if not shopping_cart_items:
+        if not shopping_cart_items.exists():
             return JsonResponse({"detail": "Корзина пуста."}, status=400)
 
-        recipes = [item.recipe for item in shopping_cart_items]
-        recipe_data = RecipeReadSerializer(
-            recipes, many=True, context={"request": request}
-        ).data
+        recipes = Recipe.objects.filter(
+            id__in=shopping_cart_items.values_list("recipe_id", flat=True)
+        ).prefetch_related("recipe_ingredients__ingredient", "author")
 
-        file_type = request.query_params.get("file_type", "txt").lower()
+        ingredients = (
+            recipes.values(
+                "ingredients__name",
+                "ingredients__measurement_unit",
+            )
+            .annotate(total_amount=Sum("recipe_ingredients__amount"))
+            .order_by("ingredients__name")
+        )
 
         current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        file_type = request.query_params.get("file_type", "txt").lower()
+
         if file_type == "pdf":
+            # Генерация PDF api/recipes/download_shopping_cart/?file_type=pdf
             response = HttpResponse(content_type="application/pdf")
             response["Content-Disposition"] = 'attachment; filename="shopping_cart.pdf"'
 
@@ -150,44 +178,50 @@ class RecipeViewSet(viewsets.ModelViewSet):
             y_position = 750
 
             pdf_canvas.setFont("NTSomic-Bold", 15)
-
             pdf_canvas.drawString(
-                50, y_position, f"Дата создания корзины: {current_date}"
+                50, y_position, f"Корзина покупок (создана: {current_date}):"
             )
             y_position -= 30
-            pdf_canvas.drawString(50, y_position, "Корзина рецептов")
-            y_position -= 60
-            for recipe in recipe_data:
-                author = recipe.get("author", {})
+            for recipe in recipes:
                 pdf_canvas.drawString(
-                    50, y_position, f"Автор: {author.get('username', '')}"
+                    50, y_position, f"Автор: {recipe.author.username}"
                 )
                 y_position -= 20
+                pdf_canvas.drawString(50, y_position, f"Рецепт: {recipe.name}")
+                y_position -= 20
+                pdf_canvas.drawString(50, y_position, f"Текст: {recipe.text}")
+                y_position -= 20
+                pdf_canvas.drawString(
+                    50, y_position, f"Время приготовления: {recipe.cooking_time} мин."
+                )
+                y_position -= 20
+                pdf_canvas.drawString(50, y_position, f"Ингредиенты:")
+                y_position -= 30
 
-                pdf_canvas.drawString(
-                    50, y_position, f"Рецепт: {recipe.get('name', '')}"
-                )
-                y_position -= 20
-                pdf_canvas.drawString(
-                    50,
-                    y_position,
-                    f"Время приготовления: {recipe.get('cooking_time', '')} минут",
-                )
-                y_position -= 20
-
-                pdf_canvas.drawString(50, y_position, "Ингредиенты:")
-                y_position -= 20
-                for ingredient in recipe.get("ingredients", []):
+                for ri in recipe.recipe_ingredients.all():
                     pdf_canvas.drawString(
                         50,
                         y_position,
-                        f"{ingredient.get('name', '')} - {ingredient.get('amount', '')} {ingredient.get('measurement_unit', '')}",
+                        f"- {ri.ingredient.name} - {ri.amount} {ri.ingredient.measurement_unit}",
                     )
                     y_position -= 20
-                    if y_position < 50:
-                        pdf_canvas.showPage()
-                        y_position = 750
-                y_position -= 20
+                y_position -= 30
+                if y_position < 120:
+                    pdf_canvas.showPage()
+                    pdf_canvas.setFont("NTSomic-Bold", 15)
+                    y_position = 750
+            pdf_canvas.drawString(50, y_position, "Список ингредиентов для покупки")
+            y_position -= 30
+
+            for ingredient in ingredients:
+                line = f"{ingredient['ingredients__name']} - {ingredient['total_amount']} {ingredient['ingredients__measurement_unit']}"
+                pdf_canvas.drawString(50, y_position, line)
+                y_position -= 30
+                if y_position < 50:
+                    pdf_canvas.showPage()
+                    pdf_canvas.setFont("NTSomic-Bold", 15)
+                    y_position = 750
+
             pdf_canvas.save()
             return response
 
@@ -195,27 +229,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
             response = HttpResponse(content_type="text/plain", charset="utf-8")
             response["Content-Disposition"] = 'attachment; filename="shopping_cart.txt"'
 
-            txt_data = f"Корзина покупок (создана: {current_date}):\n"
-            for recipe in recipe_data:
-                author = recipe.get("author", {})
-                txt_data += f"Автор: {author.get('username', '')}\n"
-                txt_data += f"Дата создания корзины: {current_date}\n"
+            txt_data = f"Корзина покупок (создана: {current_date}):\n\n"
 
-                txt_data += f"Рецепт: {recipe.get('name', '')}\n"
-                txt_data += (
-                    f"Время приготовления: {recipe.get('cooking_time', '')} минут\n"
-                )
-
+            for recipe in recipes:
+                txt_data += f"Автор: {recipe.author.username}\n"
+                txt_data += f"Рецепт: {recipe.name}\n"
+                txt_data += f"Текст: {recipe.text}\n"
+                txt_data += f"Время приготовления: {recipe.cooking_time} мин.\n"
                 txt_data += "Ингредиенты:\n"
-                for ingredient in recipe.get("ingredients", []):
-                    txt_data += f"{ingredient.get('name', '')} - {ingredient.get('amount', '')} {ingredient.get('measurement_unit', '')}\n"
-
+                for ri in recipe.recipe_ingredients.all():
+                    txt_data += f"- {ri.ingredient.name} - {ri.amount} {ri.ingredient.measurement_unit}\n"
                 txt_data += "\n"
+
+            txt_data += f"Всего рецептов в корзине: {recipes.count()}\n\n"
+
+            ingredients = (
+                Ingredient.objects.filter(ingredient_in_recipes__recipe__in=recipes)
+                .values("name", "measurement_unit")
+                .annotate(total_amount=Sum("ingredient_in_recipes__amount"))
+                .order_by("name")
+            )
+
+            txt_data += "Итого ингредиентов:\n"
+            for ingredient in ingredients:
+                txt_data += f"- {ingredient['name']} - {ingredient['total_amount']} {ingredient['measurement_unit']}\n"
 
             response.write(txt_data)
             return response
 
-   
     @action(
         detail=True,
         methods=["post", "delete"],
@@ -224,9 +265,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def add_to_favorite(self, request, pk=None):
         if request.method == "POST":
-            if request.user.is_anonymous:
-                raise AuthenticationFailed("Необходимо войти в систему.")
-
             try:
                 recipe = self.get_object()
             except Recipe.DoesNotExist:

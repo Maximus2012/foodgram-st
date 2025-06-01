@@ -12,6 +12,8 @@ from recipes.models import Recipe, Ingredient, RecipeIngredient
 from users.models import User, Subscription
 from .utils import Base64ImageField
 
+from .constants import min_amount_of_ingredients
+
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для ингредиентов."""
