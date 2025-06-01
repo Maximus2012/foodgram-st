@@ -1,35 +1,33 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .constants import (
+    user_email_max_length,
+    user_first_name_max_length,
+    user_last_name_max_length,
+    user_username_max_length,
+)
+
 
 class User(AbstractUser):
     """Класс для описания модели User."""
 
     username = models.CharField(
-        "Логин",
-        unique=True,
-        blank=False,
-        max_length=100)
+        "Логин", unique=True, blank=False, max_length=user_username_max_length
+    )
     first_name = models.CharField(
         "Имя",
         blank=False,
-        max_length=30,
+        max_length=user_first_name_max_length,
     )
     last_name = models.CharField(
-        "Фамилия",
-        blank=False,
-        max_length=30)
+        "Фамилия", blank=False, max_length=user_last_name_max_length
+    )
     email = models.EmailField(
-        "Адрес почты",
-        unique=True,
-        blank=False,
-        max_length=60
+        "Адрес почты", unique=True, blank=False, max_length=user_email_max_length
     )
     avatar = models.ImageField(
-        "Иконка",
-        blank=True,
-        null=True,
-        upload_to="avatars/users/"
+        "Иконка", blank=True, null=True, upload_to="avatars/users/"
     )
 
     USERNAME_FIELD = "email"
@@ -66,7 +64,7 @@ class Subscription(models.Model):
         constraints = [
             models.CheckConstraint(
                 check=~models.Q(user=models.F("author")),
-                name="prevent_self_subscription"
+                name="prevent_self_subscription",
             ),
             models.UniqueConstraint(
                 name="no_duplicate_subscriptions",

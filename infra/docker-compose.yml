@@ -10,7 +10,7 @@ services:
     image: postgres:13.3-alpine
     container_name: foodgram-db
     env_file:
-      - ../backend/.env
+      - ../backend/foodgram/.env
     volumes:
       - pg_data:/var/lib/postgresql/data
 
@@ -20,7 +20,7 @@ services:
       context: ../backend/
       dockerfile: Dockerfile
     env_file:
-      - ../backend/.env
+      - ../backend/foodgram/.env
     volumes:
       - static_volume:/app/static/
       - backend_media_volume:/app/media/

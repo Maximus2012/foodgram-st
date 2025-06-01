@@ -1,5 +1,7 @@
-import base64  # Модуль с функциями кодирования и декодирования base64
+import base64
+
 from django.core.files.base import ContentFile
+
 from rest_framework import serializers
 
 

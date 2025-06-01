@@ -1,10 +1,13 @@
-#  Foodgram – Recipe Sharing API
+<file name=0 path=/Users/maxkochetkov/Projects/foodgram-st/README.md>
+
+# 🍲 Foodgram – Recipe Sharing API
 
 A backend service for managing and sharing recipes, subscribing to authors, adding favorites, and generating shopping lists.
 
 ---
 
-##  Tech Stack
+## Tech Stack
+
 | **Category**        | **Technologies**                               |
 |---------------------|------------------------------------------------|
 | Backend             | Python 3.9, Django 3.2, Django REST Framework  |
@@ -15,41 +18,132 @@ A backend service for managing and sharing recipes, subscribing to authors, addi
 
 ---
 
-##  Getting Started
+## Getting Started
 
-###  Environment Variables
-The project uses the following environment variables to configure database access:
+### 1. Clone the Repository
 
-```env
-DEBUG=True of False
-SECRET_KEY=<your_sercret_key>
-DB_NAME=<your_database_name>
-DB_USER=<your_username>
-DB_PASSWORD=<your_password>
-DB_HOST=<your_database_host>
-DB_PORT=<your_database_port>
+```bash
+git clone https://github.com/Maximus2012/foodgram-st.git
+cd foodgram-st/infra
 ```
 
-###  Running the Project with Docker
+---
+
+### 2. Setup Environment Variables
+
+Create a `.env` file at:
+
+```
+foodgram-st/backend/foodgram/.env
+```
+
+Example content:
+
+```env
+DEBUG=False
+SECRET_KEY=your-django-secret-key
+
+DB_NAME=foodgram
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_HOST=db
+DB_PORT=5432
+```
+
+---
+
+### 3. Run with Docker
 
 ```bash
 docker compose build
 docker compose up
 ```
 
-After the containers are running, the API will be available based on the settings in your `docker-compose.yml` and Nginx configuration.
-
 After startup, the project will be available at:  
 👉 [http://127.0.0.1](http://127.0.0.1)
 
-###  4. Django Admin Panel
+Django Admin Panel
 Accessible at:  
 👉 [http://localhost/admin/](http://localhost/admin/)
 
+
 ---
 
-###  Importing Initial Data
-To load the initial ingredient data, run:
+### 4. Run API Locally (Without Docker)
+
+1. Go to the `backend` folder:
+
+```bash
+cd ../backend
+```
+
+2. Create a virtual environment:
+
+```bash
+python -m venv venv
+```
+
+3. Activate it:
+
+- **Windows**:
+
+```bash
+venv\Scripts\activate
+```
+
+- **macOS/Linux**:
+
+```bash
+source venv/bin/activate
+```
+
+4. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+5. Apply migrations:
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+6. Load initial ingredient data:
+
 ```bash
 python manage.py import_data
 ```
+
+7. Run the server:
+
+```bash
+python manage.py runserver
+```
+
+After startup, the project will be available at:  
+👉 [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+---
+
+## Project Structure
+
+```
+foodgram-st/
+├── backend/
+│   ├── foodgram/              # Django project
+│   └── ...
+├── frontend/                 # Optional React app
+├── infra/
+│   ├── docker-compose.yml    # Docker Compose config
+│   └── nginx.conf            # Nginx config
+├── data/                     # Initial ingredients
+└── docs/                     # API documentation
+```
+
+---
+
+## Author
+
+**Max Kochetkov**  
+[GitHub Profile](https://github.com/Maximus2012)</file>

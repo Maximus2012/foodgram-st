@@ -1,7 +1,13 @@
-from django.db import models
 from django.core.validators import MinValueValidator
+from django.db import models
+
 from users.models import User
 
+from .constants import (
+    ingredient_measurement_unit_max_length,
+    ingredient_name_max_length,
+    recipe_name_max_length,
+)
 
 class Recipe(models.Model):
     """Модель рецепта."""
@@ -14,7 +20,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         "Название рецепта",
-        max_length=80,
+        max_length=recipe_name_max_length,
         blank=False,
         help_text="Введите название рецепта",
     )
@@ -52,14 +58,14 @@ class Ingredient(models.Model):
     """Модель ингредиента."""
 
     name = models.CharField(
-        max_length=100,
+        max_length=ingredient_name_max_length,
         unique=True,
         blank=False,
         verbose_name="Название ингредиента",
         help_text="Введите название ингредиента",
     )
     measurement_unit = models.CharField(
-        max_length=20,
+        max_length=ingredient_measurement_unit_max_length,
         verbose_name="Единица измерения",
         help_text="Введите единицу измерения (например, граммы, мл, шт.)",
     )
@@ -68,6 +74,12 @@ class Ingredient(models.Model):
         ordering = ["name"]
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "measurement_unit"],
+                name="unique_ingredient_name_unit"
+            )
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.measurement_unit})"

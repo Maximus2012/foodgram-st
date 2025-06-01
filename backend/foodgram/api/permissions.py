@@ -8,9 +8,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        # Разрешаем доступ для чтения всем
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Разрешаем доступ для изменения объекта только владельцу
         return obj.author == request.user
