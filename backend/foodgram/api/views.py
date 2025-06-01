@@ -1,25 +1,37 @@
-from rest_framework import viewsets
-from recipes.models import Ingredient, Recipe, ShoppingCart, Favorite
-from .serializers import IngredientSerializer, RecipeSerializer, ShortRecipeSerializer
-from recipes.filters import IngredientFilter, RecipeFilter
-from django_filters import rest_framework as filters
-from .pagination import StandardResultsPagination
-from rest_framework.exceptions import NotFound, AuthenticationFailed
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from .permissions import IsOwnerOrReadOnly
-from rest_framework.permissions import IsAuthenticated
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from django.http import HttpResponse, JsonResponse
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
 from datetime import datetime
+
+from django.http import HttpResponse, JsonResponse
+
+from django_filters import rest_framework as filters
+
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
+
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import AuthenticationFailed, NotFound
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from djoser.views import UserViewSet as DjoserUserViewSet
-from users.models import User, Subscription
-from api.serializers import UserSerializer
-from rest_framework import status
-from api.serializers import AvatarSerializer, SubscriptionSerializer
+
+from recipes.filters import IngredientFilter, RecipeFilter
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart
+
+from api.serializers import AvatarSerializer, SubscriptionSerializer, UserSerializer
+
+from .pagination import StandardResultsPagination
+from .permissions import IsOwnerOrReadOnly
+from .serializers import (
+    IngredientSerializer,
+    RecipeReadSerializer,
+    RecipeWriteSerializer,
+    ShortRecipeSerializer,
+)
+
+from users.models import Subscription, User
 
 pdfmetrics.registerFont(TTFont("NTSomic-Bold", "fonts/NTSomic-Regular.ttf"))
 
@@ -36,54 +48,78 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
     pagination_class = StandardResultsPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilter
     permission_classes = [IsOwnerOrReadOnly]
 
-    @action(
-        detail=True,
-        methods=["post", "delete"],
-        url_path="shopping_cart",
-        permission_classes=[IsAuthenticated],
-    )
-    def add_to_shopping_cart(self, request, pk=None):
-        if request.user.is_anonymous:
-            raise AuthenticationFailed("Необходимо войти в систему.")
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return RecipeReadSerializer
+        return RecipeWriteSerializer
 
+    def create(self, request, *args, **kwargs):
+        if request.user.is_anonymous:
+            raise AuthenticationFailed("Только авторизованные пользователи могут создавать рецепты.")
+
+        write_serializer = self.get_serializer(data=request.data)
+        write_serializer.is_valid(raise_exception=True)
+        self.perform_create(write_serializer)
+
+        read_serializer = RecipeReadSerializer(
+            write_serializer.instance,
+            context=self.get_serializer_context()
+        )
+        headers = self.get_success_headers(read_serializer.data)
+        return Response(read_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        write_serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        write_serializer.is_valid(raise_exception=True)
+        self.perform_update(write_serializer)
+
+        read_serializer = RecipeReadSerializer(
+            write_serializer.instance,
+            context=self.get_serializer_context()
+        )
+        return Response(read_serializer.data, status=status.HTTP_200_OK)
+
+    def _handle_add_remove(self, model, request, pk, serializer_class=None):
         try:
             recipe = self.get_object()
         except Recipe.DoesNotExist:
             raise NotFound("Рецепт не найден.")
 
         if request.method == "POST":
-            if ShoppingCart.objects.filter(user=request.user, recipe=recipe).exists():
+            if model.objects.filter(user=request.user, recipe=recipe).exists():
                 return Response(
-                    {"detail": "Рецепт уже добавлен в корзину."}, status=400
+                    {"errors": "Рецепт уже добавлен."},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-
-            ShoppingCart.objects.create(user=request.user, recipe=recipe)
-
-            data = RecipeSerializer(recipe, context={"request": request}).data
-
-            cleaned_data = {
-                "id": data["id"],
-                "name": data["name"],
-                "image": data["image"],
-                "cooking_time": data["cooking_time"],
-            }
-
-            return Response(cleaned_data, status=201)
+            model.objects.create(user=request.user, recipe=recipe)
+            if serializer_class:
+                serializer = serializer_class(recipe, context={"request": request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                # fallback - полный сериализатор
+                serializer = RecipeReadSerializer(recipe, context={"request": request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         elif request.method == "DELETE":
-            cart_item = ShoppingCart.objects.filter(
-                user=request.user, recipe=recipe
-            ).first()
-            if not cart_item:
-                return Response({"detail": "Рецепт не найден в корзине."}, status=400)
-            cart_item.delete()
-            return Response(status=204)
+            obj = model.objects.filter(user=request.user, recipe=recipe).first()
+            if not obj:
+                return Response(
+                    {"errors": "Рецепт не найден в списке."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post", "delete"], url_path="shopping_cart", permission_classes=[IsAuthenticated])
+    def add_to_shopping_cart(self, request, pk=None):
+        return self._handle_add_remove(ShoppingCart, request, pk, serializer_class=ShortRecipeSerializer)
 
     @action(
         detail=False,
@@ -98,7 +134,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return JsonResponse({"detail": "Корзина пуста."}, status=400)
 
         recipes = [item.recipe for item in shopping_cart_items]
-        recipe_data = RecipeSerializer(
+        recipe_data = RecipeReadSerializer(
             recipes, many=True, context={"request": request}
         ).data
 
@@ -179,13 +215,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             response.write(txt_data)
             return response
 
-    def create(self, request, *args, **kwargs):
-        if request is None or request.user.is_anonymous:
-            raise AuthenticationFailed(
-                "Только авторизованные пользователи могут создавать рецепты."
-            )
-        return super().create(request, *args, **kwargs)
-
+   
     @action(
         detail=True,
         methods=["post", "delete"],
