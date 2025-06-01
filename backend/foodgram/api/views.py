@@ -367,10 +367,7 @@ class UserViewSet(DjoserUserViewSet):
     def subscriptions(self, request):
         current_user = request.user
 
-        followed = Subscription.objects.filter(user=current_user).values_list(
-            "author", flat=True
-        )
-        authors = User.objects.filter(id__in=followed)
+        authors = User.objects.filter(subscribers__user=current_user)
 
         page = self.paginate_queryset(authors)
         if page is not None:
@@ -382,6 +379,7 @@ class UserViewSet(DjoserUserViewSet):
         serializer = SubscriptionSerializer(
             authors, many=True, context={"request": request}
         )
+        return Response(serializer.data)
 
     @action(
         detail=False,

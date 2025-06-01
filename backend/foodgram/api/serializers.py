@@ -2,14 +2,13 @@ import base64
 import re
 
 from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
 
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from djoser.serializers import UserSerializer as DjoserUserSerializer
 from rest_framework import serializers
 
 from recipes.models import Recipe, Ingredient, RecipeIngredient
-from users.models import User, Subscription
+from users.models import User
 from .utils import Base64ImageField
 
 from .constants import min_amount_of_ingredients
@@ -129,7 +128,7 @@ class UserSerializer(DjoserUserSerializer):
         current_user = self.context["request"].user
         if not current_user.is_authenticated:
             return False
-        return Subscription.objects.filter(user=current_user, author=user_obj).exists()
+        return user_obj.subscribers.filter(user=current_user).exists()
 
     def get_avatar(self, user_obj):
         return user_obj.avatar.url if user_obj.avatar else ""
@@ -201,21 +200,13 @@ class UserCreateSerializer(BaseUserCreateSerializer):
 class AvatarSerializer(serializers.Serializer):
     """Сериализатор для обработки изображения в формате Base64."""
 
-    avatar = serializers.CharField(write_only=True, required=True)
+    avatar = Base64ImageField(required=True)
 
-    def validate_avatar(self, base64_string):
+    def validate_avatar(self, value):
         """Декодируем base64 и создаём файл-объект."""
-        if not base64_string:
+        if not value:
             raise serializers.ValidationError("Поле 'avatar' обязательно.")
-
-        try:
-            format, img_str = base64_string.split(";base64,")
-            ext = format.split("/")[-1]
-            decoded_img = base64.b64decode(img_str)
-        except Exception:
-            raise serializers.ValidationError("Некорректный формат изображения.")
-
-        return ContentFile(decoded_img, name=f"user_avatar.{ext}")
+        return value
 
 
 class RecipeForSubscriptionSerializer(serializers.ModelSerializer):
@@ -226,30 +217,23 @@ class RecipeForSubscriptionSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "image", "cooking_time")
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализатор для подписок."""
-
+class SubscriptionSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
+    recipes_count = serializers.IntegerField(source='recipes.count', read_only=True)
 
-    class Meta:
-        model = User
-        fields = (
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "email",
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + (
             "is_subscribed",
-            "avatar",
             "recipes",
             "recipes_count",
         )
 
     def get_is_subscribed(self, obj):
         current_user = self.context["request"].user
-        return Subscription.objects.filter(user=current_user, author=obj).exists()
+        if current_user.is_anonymous:
+            return False
+        return obj.subscribers.filter(user=current_user).exists()
 
     def get_recipes(self, obj):
         request = self.context.get("request")
@@ -257,9 +241,4 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         queryset = obj.recipes.all()
         if recipes_limit and recipes_limit.isdigit():
             queryset = queryset[: int(recipes_limit)]
-        return RecipeForSubscriptionSerializer(
-            queryset, many=True, context=self.context
-        ).data
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
+        return RecipeForSubscriptionSerializer(queryset, many=True, context=self.context).data
