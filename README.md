@@ -1,5 +1,3 @@
-<file name=0 path=/Users/maxkochetkov/Projects/foodgram-st/README.md>
-
 # 🍲 Foodgram – Recipe Sharing API
 
 A backend service for managing and sharing recipes, subscribing to authors, adding favorites, and generating shopping lists.
@@ -34,7 +32,7 @@ cd foodgram-st/infra
 Create a `.env` file at:
 
 ```
-foodgram-st/backend/foodgram/.env
+foodgram-st/backend/.env
 ```
 
 Example content:
@@ -48,6 +46,7 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 DB_HOST=db
 DB_PORT=5432
+ALLOWED_HOSTS=127.0.0.1,localhost,example.com
 ```
 
 ---
@@ -103,19 +102,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-5. Apply migrations:
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-6. Load initial ingredient data:
+5. Load initial ingredient data:
 
 ```bash
 python manage.py import_data
 ```
 
-7. Run the server:
+6. Run the server:
 
 ```bash
 python manage.py runserver
@@ -130,9 +123,7 @@ After startup, the project will be available at:
 
 ```
 foodgram-st/
-├── backend/
-│   ├── foodgram/              # Django project
-│   └── ...
+├── backend/ Django project
 ├── frontend/                 # Optional React app
 ├── infra/
 │   ├── docker-compose.yml    # Docker Compose config
@@ -146,4 +137,4 @@ foodgram-st/
 ## Author
 
 **Max Kochetkov**  
-[GitHub Profile](https://github.com/Maximus2012)</file>
+[GitHub Profile](https://github.com/Maximus2012)
