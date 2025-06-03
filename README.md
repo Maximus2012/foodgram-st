@@ -128,7 +128,7 @@ After startup, the project will be available at:
 
 ```
 foodgram-st/
-├── backend/ Django project
+├── backend/                  # Django project
 ├── frontend/                 # Optional React app
 ├── infra/
 │   ├── docker-compose.yml    # Docker Compose config
