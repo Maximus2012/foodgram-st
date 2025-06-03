@@ -102,13 +102,18 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-5. Load initial ingredient data:
+5. Apply migrations:
+```bash
+python manage.py migrate
+```
+
+6. Load initial ingredient data:
 
 ```bash
 python manage.py import_data
 ```
 
-6. Run the server:
+7. Run the server:
 
 ```bash
 python manage.py runserver
