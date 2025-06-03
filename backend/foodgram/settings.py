@@ -5,11 +5,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY", "default")
 
-DEBUG = os.getenv("DEBUG", "True")
+DEBUG = bool(os.getenv("DEBUG", True))
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+HOSTS = os.getenv("ALLOWED_HOSTS", "")
 
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1', 'http://localhost']
+ALLOWED_HOSTS = HOSTS.split(",") if HOSTS else ["127.0.0.1", "localhost"]
+
+CSRF_TRUSTED_ORIGINS = [f"http://{host}" for host in ALLOWED_HOSTS]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -75,8 +77,6 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", "27119"),
     }
 }
-
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {

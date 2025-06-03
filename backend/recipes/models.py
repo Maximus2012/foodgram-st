@@ -2,12 +2,13 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from users.models import User
-
 from .constants import (
-    ingredient_measurement_unit_max_length,
-    ingredient_name_max_length,
-    recipe_name_max_length,
+    RECIPE_NAME_MAX_LENGTH,
+    INGREDIENT_NAME_MAX_LENGTH,
+    INGREDIENT_MEASUREMENT_UNIT_MAX_LENGTH,
+    MIN_TIME_COOKING
 )
+
 
 class Recipe(models.Model):
     """Модель рецепта."""
@@ -20,7 +21,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         "Название рецепта",
-        max_length=recipe_name_max_length,
+        max_length=RECIPE_NAME_MAX_LENGTH,
         blank=False,
         help_text="Введите название рецепта",
     )
@@ -44,7 +45,7 @@ class Recipe(models.Model):
         auto_now_add=True,
         verbose_name="Время публикации",
     )
-    
+
     class Meta:
         ordering = ("-created_at", "name")
         verbose_name = "Рецепт"
@@ -58,14 +59,14 @@ class Ingredient(models.Model):
     """Модель ингредиента."""
 
     name = models.CharField(
-        max_length=ingredient_name_max_length,
+        max_length=INGREDIENT_NAME_MAX_LENGTH,
         unique=True,
         blank=False,
         verbose_name="Название ингредиента",
         help_text="Введите название ингредиента",
     )
     measurement_unit = models.CharField(
-        max_length=ingredient_measurement_unit_max_length,
+        max_length=INGREDIENT_MEASUREMENT_UNIT_MAX_LENGTH,
         verbose_name="Единица измерения",
         help_text="Введите единицу измерения (например, граммы, мл, шт.)",
     )
@@ -102,7 +103,7 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveIntegerField(
         verbose_name="Количество",
-        validators=[MinValueValidator(1)],
+        validators=[MinValueValidator(MIN_TIME_COOKING)],
         help_text="Укажите количество ингредиента",
     )
 

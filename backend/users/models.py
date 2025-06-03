@@ -2,10 +2,10 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from .constants import (
-    user_email_max_length,
-    user_first_name_max_length,
-    user_last_name_max_length,
-    user_username_max_length,
+    USER_USERNAME_MAX_LENGTH,
+    USER_FIRST_NAME_MAX_LENGTH,
+    USER_LAST_NAME_MAX_LENGTH,
+    USER_EMAIL_MAX_LENGTH,
 )
 
 
@@ -13,18 +13,18 @@ class User(AbstractUser):
     """Класс для описания модели User."""
 
     username = models.CharField(
-        "Логин", unique=True, blank=False, max_length=user_username_max_length
+        "Логин", unique=True, blank=False, max_length=USER_USERNAME_MAX_LENGTH
     )
     first_name = models.CharField(
         "Имя",
         blank=False,
-        max_length=user_first_name_max_length,
+        max_length=USER_FIRST_NAME_MAX_LENGTH,
     )
     last_name = models.CharField(
-        "Фамилия", blank=False, max_length=user_last_name_max_length
+        "Фамилия", blank=False, max_length=USER_LAST_NAME_MAX_LENGTH
     )
     email = models.EmailField(
-        "Адрес почты", unique=True, blank=False, max_length=user_email_max_length
+        "Адрес почты", unique=True, blank=False, max_length=USER_EMAIL_MAX_LENGTH
     )
     avatar = models.ImageField(
         "Иконка", blank=True, null=True, upload_to="avatars/users/"
