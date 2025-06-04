@@ -1,15 +1,8 @@
-from rest_framework.decorators import api_view
-from rest_framework.exceptions import NotFound
-from rest_framework.response import Response
+from django.shortcuts import get_object_or_404, redirect
 
 from .models import Recipe
 
 
-@api_view(["GET"])
-def get_link(request, pk=None):
-    try:
-        recipe = Recipe.objects.get(pk=pk)
-        short_link = f"/recipes/{recipe.id}/"
-        return Response({"short-link": short_link})
-    except Recipe.DoesNotExist:
-        raise NotFound(detail="Рецепт не найден")
+def short_link_redirect(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    return redirect(f'/api/recipes/{recipe.pk}/')

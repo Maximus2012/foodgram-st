@@ -3,13 +3,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from recipes.views import get_link
+from recipes.views import short_link_redirect
 
 urlpatterns = [
 
     path('api/', include('users.urls')),
     path('api/', include('recipes.urls')),
-    path('api/recipes/<int:pk>/get-link/', get_link, name='recipe-get-link'),
+    path("api/s/<int:pk>/", short_link_redirect, name="short-link"),
     path("admin/", admin.site.urls),
 ]
 
