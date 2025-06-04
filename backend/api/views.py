@@ -3,6 +3,7 @@ from datetime import datetime
 from django.http import HttpResponse, JsonResponse
 from django_filters import rest_framework as filters
 from django.db.models import Sum
+from django.urls import reverse
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -233,6 +234,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
             favorite_item.delete()
             return Response(status=204)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="get-link",
+        permission_classes=[IsAuthenticated],
+    )
+    def get_link(self, request, pk):
+        """
+        Возвращает абсолютную короткую ссылку на рецепт по его идентификатору.
+        """
+        short_path = reverse("short-link", args=[pk])
+        absolute_short_link = request.build_absolute_uri(short_path)
+        return Response({"short-link": absolute_short_link})
 
 
 class UserViewSet(DjoserUserViewSet):

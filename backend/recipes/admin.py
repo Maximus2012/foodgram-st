@@ -1,14 +1,14 @@
 from django.contrib import admin
 
 from .models import Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart
-from .constants import EXTRA, MIN_NUM
+from .constants import DEFAULT_EMPTY_INGREDIENT_FORMS, MIN_INGREDIENT_COUNT
 
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
-    extra = EXTRA
+    extra = DEFAULT_EMPTY_INGREDIENT_FORMS
     autocomplete_fields = ["ingredient"]
-    min_num = MIN_NUM
+    min_num = MIN_INGREDIENT_COUNT
     verbose_name = "Ингредиент"
     verbose_name_plural = "Ингредиенты"
     fields = ("ingredient", "amount")
