@@ -5,12 +5,13 @@ from django.urls import include, path
 
 from recipes.views import short_link_redirect
 
+
 urlpatterns = [
 
-    path('api/', include('users.urls')),
-    path('api/', include('recipes.urls')),
-    path("api/s/<int:pk>/", short_link_redirect, name="short-link"),
+    path('api/', include('api.urls')),
     path("admin/", admin.site.urls),
+    path("api/s/<int:pk>/", short_link_redirect, name="short-link"),
+
 ]
 
 if settings.DEBUG:

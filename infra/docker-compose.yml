@@ -1,5 +1,3 @@
-version: '3.8'
-
 volumes:
   pg_data:
   static_volume:
@@ -9,32 +7,52 @@ services:
   db:
     image: postgres:13.3-alpine
     container_name: foodgram-db
-    env_file:
-      - ../backend/.env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - foodgram-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     container_name: foodgram-backend
     build:
       context: ../backend/
       dockerfile: Dockerfile
-    env_file:
-      - ../backend/.env
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - static_volume:/app/static/
       - backend_media_volume:/app/media/
       - ../data:/app/fixtures
+    ports:
+      - "8000:8000"
     networks:
       - foodgram-network
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
     container_name: foodgram-front
     build: ../frontend
     volumes:
       - static_volume:/app/result_build/
+    ports:
+      - "3000:3000"
     networks:
       - foodgram-network
 

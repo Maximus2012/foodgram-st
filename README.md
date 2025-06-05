@@ -32,7 +32,7 @@ cd foodgram-st/infra
 Create a `.env` file at:
 
 ```
-foodgram-st/backend/.env
+foodgram-st/infra/.env
 ```
 
 Example content:
