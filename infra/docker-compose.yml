@@ -35,11 +35,15 @@ services:
     env_file:
       - ./.env
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${SECRET_KEY}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+
     volumes:
       - static_volume:/app/static/
       - backend_media_volume:/app/media/
