@@ -13,7 +13,6 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import (
     IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
     AllowAny,
 )
 from rest_framework.response import Response
