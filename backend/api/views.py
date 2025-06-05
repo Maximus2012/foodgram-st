@@ -50,7 +50,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
