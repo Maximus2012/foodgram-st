@@ -1,3 +1,5 @@
+version: "3.8"
+
 volumes:
   pg_data:
   static_volume:
@@ -7,6 +9,8 @@ services:
   db:
     image: postgres:13.3-alpine
     container_name: foodgram-db
+    env_file:
+      - ./.env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -28,6 +32,8 @@ services:
     build:
       context: ../backend/
       dockerfile: Dockerfile
+    env_file:
+      - ./.env
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
