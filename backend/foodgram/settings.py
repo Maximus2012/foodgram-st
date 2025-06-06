@@ -20,8 +20,8 @@ CSRF_TRUSTED_ORIGINS = [f"http://{host}" for host in ALLOWED_HOSTS]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static/backend/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static/backend")
 
 
 INSTALLED_APPS = [
