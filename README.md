@@ -59,11 +59,15 @@ docker compose up
 ```
 
 After startup, the project will be available at:  
-👉 [http://127.0.0.1](http://127.0.0.1)
+👉 [http://localhost/recipes](http://localhost/recipes)
 
 Django Admin Panel
 Accessible at:  
 👉 [http://localhost/admin/](http://localhost/admin/)
+
+API
+Accessible at:  
+👉 [http://localhost/api/docs/](http://localhost/api/docs/)
 
 
 ---
@@ -123,6 +127,13 @@ After startup, the project will be available at:
 👉 [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ---
+
+# Optional:
+
+ You can use fixtures to load users and recipes:
+ ```bash
+python manage.py loaddata users_and_recipes.json
+```
 
 ## Project Structure
 

@@ -1,0 +1,229 @@
+[
+    {
+      "model": "users.user",
+      "pk": 1,
+      "fields": {
+        "email": "vpupkin@yandex.ru",
+        "username": "vasya.pupkin",
+        "first_name": "Вася",
+        "last_name": "Иванов",
+        "password": "pbkdf2_sha256$260000$KqxLWl6k4udnZtKr7AqRJ0$xB3UvG7DQK03uGsEvYidSAeJtvAxVC3nEsLQ9NZSLB8=",
+        "is_active": true
+      }
+    },
+    {
+      "model": "users.user",
+      "pk": 2,
+      "fields": {
+        "email": "anna.petrovna@mail.com",
+        "username": "anna.petrovna",
+        "first_name": "Анна",
+        "last_name": "Петрова",
+        "password": "pbkdf2_sha256$260000$abcd1234efgh5678$somehashedpasswordhere",
+        "is_active": true
+      }
+    },
+    {
+      "model": "users.user",
+      "pk": 3,
+      "fields": {
+        "email": "igor.smirnov@gmail.com",
+        "username": "igor.smirnov",
+        "first_name": "Игорь",
+        "last_name": "Смирнов",
+        "password": "pbkdf2_sha256$260000$xyz987654321$anotherhashedpasswordhere",
+        "is_active": true
+      }
+    },
+  
+    {
+      "model": "recipes.recipe",
+      "pk": 1,
+      "fields": {
+        "name": "Овощное рагу",
+        "text": "Простое овощное рагу с картофелем и морковью.",
+        "cooking_time": 30,
+        "author": 1,
+        "image": "",
+        "created_at": "2025-06-06T14:30:00Z"
+      }
+    },
+    {
+      "model": "recipes.recipe",
+      "pk": 2,
+      "fields": {
+        "name": "Куриный суп",
+        "text": "Классический куриный суп с лапшой и зеленью.",
+        "cooking_time": 45,
+        "author": 2,
+        "image": "",
+        "created_at": "2025-06-05T11:00:00Z"
+      }
+    },
+    {
+      "model": "recipes.recipe",
+      "pk": 3,
+      "fields": {
+        "name": "Салат Цезарь",
+        "text": "Свежий салат с курицей, сыром и сухариками.",
+        "cooking_time": 15,
+        "author": 3,
+        "image": "",
+        "created_at": "2025-06-04T18:20:00Z"
+      }
+    },
+    {
+      "model": "recipes.recipe",
+      "pk": 4,
+      "fields": {
+        "name": "Паста с томатным соусом",
+        "text": "Паста под соусом из свежих томатов и базилика.",
+        "cooking_time": 25,
+        "author": 1,
+        "image": "",
+        "created_at": "2025-06-03T16:00:00Z"
+      }
+    },
+    {
+      "model": "recipes.recipe",
+      "pk": 5,
+      "fields": {
+        "name": "Борщ",
+        "text": "Традиционный русский борщ с мясом и свеклой.",
+        "cooking_time": 90,
+        "author": 2,
+        "image": "",
+        "created_at": "2025-06-02T12:15:00Z"
+      }
+    },
+    {
+      "model": "recipes.recipe",
+      "pk": 6,
+      "fields": {
+        "name": "Омлет с овощами",
+        "text": "Легкий омлет с помидорами и зеленью.",
+        "cooking_time": 10,
+        "author": 3,
+        "image": "",
+        "created_at": "2025-06-01T08:45:00Z"
+      }
+    },
+    {
+      "model": "recipes.recipe",
+      "pk": 7,
+      "fields": {
+        "name": "Гречневая каша",
+        "text": "Полезная гречневая каша с маслом.",
+        "cooking_time": 20,
+        "author": 1,
+        "image": "",
+        "created_at": "2025-05-31T07:30:00Z"
+      }
+    },
+  
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 1,
+      "fields": {
+        "recipe": 1,
+        "ingredient": 1,
+        "amount": 2
+      }
+    },
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 2,
+      "fields": {
+        "recipe": 1,
+        "ingredient": 2,
+        "amount": 3
+      }
+    },
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 3,
+      "fields": {
+        "recipe": 1,
+        "ingredient": 3,
+        "amount": 1
+      }
+    },
+  
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 4,
+      "fields": {
+        "recipe": 2,
+        "ingredient": 1,
+        "amount": 1
+      }
+    },
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 5,
+      "fields": {
+        "recipe": 2,
+        "ingredient": 3,
+        "amount": 2
+      }
+    },
+  
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 6,
+      "fields": {
+        "recipe": 3,
+        "ingredient": 2,
+        "amount": 2
+      }
+    },
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 7,
+      "fields": {
+        "recipe": 3,
+        "ingredient": 3,
+        "amount": 1
+      }
+    },
+  
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 8,
+      "fields": {
+        "recipe": 4,
+        "ingredient": 1,
+        "amount": 3
+      }
+    },
+  
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 9,
+      "fields": {
+        "recipe": 5,
+        "ingredient": 2,
+        "amount": 5
+      }
+    },
+  
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 10,
+      "fields": {
+        "recipe": 6,
+        "ingredient": 3,
+        "amount": 2
+      }
+    },
+  
+    {
+      "model": "recipes.recipeingredient",
+      "pk": 11,
+      "fields": {
+        "recipe": 7,
+        "ingredient": 1,
+        "amount": 4
+      }
+    }
+  ]
