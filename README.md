@@ -59,11 +59,15 @@ docker compose up
 ```
 
 After startup, the project will be available at:  
-👉 [http://127.0.0.1](http://127.0.0.1)
+👉 [http://localhost/recipes](http://localhost/recipes)
 
 Django Admin Panel
 Accessible at:  
 👉 [http://localhost/admin/](http://localhost/admin/)
+
+API
+Accessible at:  
+👉 [http://localhost/api/docs/](http://localhost/api/docs/)
 
 
 ---
