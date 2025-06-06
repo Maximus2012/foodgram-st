@@ -128,6 +128,13 @@ After startup, the project will be available at:
 
 ---
 
+# Optional:
+
+ You can use fixtures to load users and recipes:
+ ```bash
+python manage.py loaddata users_and_recipes.json
+```
+
 ## Project Structure
 
 ```
